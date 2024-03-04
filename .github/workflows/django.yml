@@ -1,0 +1,42 @@
+name: Django CI with Docker
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      docker:
+        image: docker:19.03.12
+        options: --privileged
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Copy .env.example to .env
+      run: cp .env.example .env
+
+    - name: Build and run containers
+      run: docker-compose up -d
+
+    - name: Run Flake8
+      run: docker exec web flake8 .
+
+    - name: Run Black (check mode)
+      run: docker exec web black . --check
+
+    - name: Run tests with coverage
+      run: docker exec web coverage run manage.py test
+
+    - name: Coverage report
+      run: docker exec web coverage report -m --fail-under=75

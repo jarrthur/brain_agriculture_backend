@@ -1,0 +1,14 @@
+[flake8]
+max-line-length = 120
+exclude =
+    venv,
+    env,
+    migrations,
+    __init__.py,
+    manage.py,
+    wsgi.py,
+ignore =
+    E203,
+    W503,
+    F403,
+    F405,
